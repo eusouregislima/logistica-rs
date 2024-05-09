@@ -37,6 +37,13 @@ padding: 10px;
 width: 300px;
 margin-top: 15px;
 `
+export const ButtonStop = styled(TouchableOpacity)`
+background-color: #000;
+border: 1px solid #fff;
+padding: 10px;
+width: 300px;
+margin-top: 65px;
+`
 
 export const CoordinatesText = styled(Text)`
 margin-top: 15px;
