@@ -10,7 +10,7 @@ function Home() {
   const [coordinates, setCoordinates] = useState(null);
   const [intervalId, setIntervalId] = useState(null);
 
-  const url = `https://logistica-rs.com.br/api-tracking-rs/received-webhook-location?lat=${coordinates?.latitude}&long=${coordinates?.longitude}&u=${phoneNumber}`;
+  const url = `https://logistica-rs.com.br/api-tracking-rs/received-webhook-location?lat=${coordinates?.latitude}&longitude=${coordinates?.longitude}&u=${phoneNumber}`;
   console.log(url)
 
   const getLocation = async () => {
