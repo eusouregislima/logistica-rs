@@ -62,10 +62,13 @@ export const Input = styled.TextInput.attrs({
   border-radius: 4px;
   color: #fff;
   margin-bottom: 5px;
+
+  pointer-events: ${(props) => props.editable ? 'auto' : 'none'}
 `;
 
- export const Select = styled(RNPickerSelect)`
+export const Select = styled(RNPickerSelect)`
    width: 80%;
    border: 1px solid #ccc;
    margin: 10px 0;
+
  `

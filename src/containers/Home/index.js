@@ -19,6 +19,7 @@ function Home() {
   const [type, setType] = useState('')
   const [intervalId, setIntervalId] = useState(null)
   const [isLocation, setIsLocation] = useState(false)
+  const [inputsDisabled, setInputsDisabled] = useState(false)
 
   const getLocation = async () => {
     try {
@@ -41,11 +42,12 @@ function Home() {
 
   const sendLocation = async (coordinates) => {
     try {
-      await api.get(
+      const data = await api.get(
         `api-tracking-rs/received-webhook-location?lat=${coordinates.latitude}&longitude=${coordinates.longitude}&u=${phoneNumber}&tipo=${type}`,
       )
       startInterval()
       setIsLocation(true)
+      console.log(data)
     } catch (error) {
       console.error(error)
     }
@@ -54,6 +56,7 @@ function Home() {
   const handleLocationButtonClick = async () => {
     if (phoneNumber !== '') {
       getLocation()
+      setInputsDisabled(true)
     } else {
       return
     }
@@ -74,6 +77,7 @@ function Home() {
         placeholder="Digite o seu Telefone"
         value={phoneNumber}
         onChangeText={(text) => setPhoneNumber(text)}
+        editable={!inputsDisabled}
       />
       <Select
         useNativeAndroidPickerStyle={false}
@@ -85,6 +89,7 @@ function Home() {
           { label: 'Carreta', value: 'carreta' },
           { label: 'Furgão/Baú', value: 'furgaoBau' },
         ]}
+        disabled={inputsDisabled}
       />
 
       <Button onPress={handleLocationButtonClick}>
