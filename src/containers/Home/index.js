@@ -4,10 +4,11 @@ import {
   Button,
   Container,
   Paragraph,
-  CoordinatesText,
+  Select,
   Input,
   ParagraphSpan,
   ParagraphTitle,
+  ParagraphButton,
 } from './styles'
 import { getCurrentLocationAsync } from '../../services/LocationService'
 import api from '../../services/api'
@@ -15,8 +16,9 @@ import api from '../../services/api'
 function Home() {
   useKeepAwake()
   const [phoneNumber, setPhoneNumber] = useState('')
+  const [type, setType] = useState('')
   const [intervalId, setIntervalId] = useState(null)
-  const [isLocation, setIsLocation] = useState(false);
+  const [isLocation, setIsLocation] = useState(false)
 
   const getLocation = async () => {
     try {
@@ -37,14 +39,11 @@ function Home() {
     }
   }
 
-
   const sendLocation = async (coordinates) => {
     try {
-      const data = await api.get(
-        `api-tracking-rs/received-webhook-location?lat=37.4220936&longitude=-122.083922&u=11968290266`,
+      await api.get(
+        `api-tracking-rs/received-webhook-location?lat=${coordinates.latitude}&longitude=${coordinates.longitude}&u=${phoneNumber}&tipo=${type}`,
       )
-
-      console.log(data.status)
       startInterval()
       setIsLocation(true)
     } catch (error) {
@@ -60,6 +59,12 @@ function Home() {
     }
   }
 
+  const placeholder = {
+    label: 'Escolha o tipo de transporte...',
+    value: null,
+    color: '#ccc',
+  }
+
   return (
     <Container>
       <ParagraphTitle>LOGÍSTICA RS</ParagraphTitle>
@@ -70,15 +75,22 @@ function Home() {
         value={phoneNumber}
         onChangeText={(text) => setPhoneNumber(text)}
       />
+      <Select
+        useNativeAndroidPickerStyle={false}
+        placeholder={placeholder}
+        onValueChange={(value) => setType(value)}
+        items={[
+          { label: 'Rodo-Trem', value: 'rodoTrem' },
+          { label: 'Bi-Trem', value: 'biTrem' },
+          { label: 'Carreta', value: 'carreta' },
+          { label: 'Furgão/Baú', value: 'furgaoBau' },
+        ]}
+      />
 
       <Button onPress={handleLocationButtonClick}>
-        <Paragraph>Envie sua localização</Paragraph>
+        <ParagraphButton> Envie sua localização </ParagraphButton>
       </Button>
-      {isLocation && (
-        <Container>
-          <Paragraph>Sua localização está sendo enviada</Paragraph>
-        </Container>
-      )}
+      {isLocation && <Paragraph>Sua localização está sendo enviada</Paragraph>}
     </Container>
   )
 }
