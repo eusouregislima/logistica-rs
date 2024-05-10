@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useKeepAwake } from 'expo-keep-awake'
 import {
   Button,
@@ -12,6 +12,14 @@ import {
 } from './styles'
 import { getCurrentLocationAsync } from '../../services/LocationService'
 import api from '../../services/api'
+import * as BackgroundFetch from 'expo-background-fetch';
+import * as TaskManager from 'expo-task-manager';
+
+BackgroundFetch.Result = {
+  NewData: 'newData',
+  NoData: 'noData',
+  Failed: 'failed',
+};
 
 function Home() {
   useKeepAwake()
@@ -20,6 +28,10 @@ function Home() {
   const [intervalId, setIntervalId] = useState(null)
   const [isLocation, setIsLocation] = useState(false)
   const [inputsDisabled, setInputsDisabled] = useState(false)
+
+  useEffect(() => {
+    registerBackgroundFetch();
+  }, []);
 
   const getLocation = async () => {
     try {
@@ -67,6 +79,32 @@ function Home() {
     value: null,
     color: '#ccc',
   }
+
+  const registerBackgroundFetch = async () => {
+    try {
+      TaskManager.defineTask('sendLocationTask', async () => {
+        try {
+          const coordData = await getCurrentLocationAsync();
+          console.log('Localização atual:', coordData);
+          sendLocation(coordData);
+          return BackgroundFetch.Result.NewData;
+        } catch (error) {
+          console.error('Erro ao executar tarefa em segundo plano:', error);
+          return BackgroundFetch.Result.Failed;
+        }
+      });
+
+      await BackgroundFetch.registerTaskAsync('sendLocationTask', {
+        minimumInterval: 60, // Intervalo mínimo em segundos
+        stopOnTerminate: false, // Continua em segundo plano mesmo quando o aplicativo é fechado
+        startOnBoot: true, // Inicia automaticamente após a inicialização do dispositivo
+      });
+
+      BackgroundFetch.setMinimumIntervalAsync(60); // Garante que a tarefa seja executada a cada 60 segundos
+    } catch (error) {
+      console.error('Erro ao registrar tarefa em segundo plano:', error);
+    }
+  };
 
   return (
     <Container>
