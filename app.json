@@ -27,11 +27,7 @@
         "backgroundColor": "#000"
       },
       "package": "com.rod_dolpho.missaors",
-      "permissions": [
-        "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION",
-        "ACCESS_BACKGROUND_LOCATION"
-      ]
+      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION", "ACCESS_BACKGROUND_LOCATION", "FOREGROUND_SERVICE"]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -41,6 +37,15 @@
         "projectId": "1d3b99c0-1917-4af3-8c28-82e2cd50c0d2"
       }
     },
-    "owner": "rod_dolpho"
+    "owner": "rod_dolpho",
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Missão RS to use your location.",
+          "isAndroidBackgroundLocationEnabled": true
+        }
+      ]
+    ]
   }
 }
