@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import * as Location from 'expo-location'
 import { useKeepAwake } from 'expo-keep-awake'
 import {
   Button,
@@ -12,14 +13,14 @@ import {
 } from './styles'
 import { getCurrentLocationAsync } from '../../services/LocationService'
 import api from '../../services/api'
-import * as BackgroundFetch from 'expo-background-fetch';
-import * as TaskManager from 'expo-task-manager';
+import * as BackgroundFetch from 'expo-background-fetch'
+import * as TaskManager from 'expo-task-manager'
 
 BackgroundFetch.Result = {
   NewData: 'newData',
   NoData: 'noData',
   Failed: 'failed',
-};
+}
 
 function Home() {
   useKeepAwake()
@@ -30,8 +31,22 @@ function Home() {
   const [inputsDisabled, setInputsDisabled] = useState(false)
 
   useEffect(() => {
-    registerBackgroundFetch();
-  }, []);
+    async function myLocation() {
+      await Location.startLocationUpdatesAsync('sendLocationTask', {
+        accuracy: Location.Accuracy.Balanced,
+        timeInterval: 60000,
+        distanceInterval: 0,
+        foregroundService: {
+          notificationTitle: 'Background Location',
+          notificationBody: 'Location updates are running in the background',
+          notificationColor: '#ff0000',
+        },
+      })
+    }
+
+    myLocation()
+    registerBackgroundFetch()
+  }, [])
 
   const getLocation = async () => {
     try {
@@ -53,13 +68,13 @@ function Home() {
   }
 
   const sendLocation = async (coordinates) => {
+    console.log(coordinates, 'coord')
     try {
       const data = await api.get(
         `api-tracking-rs/received-webhook-location?lat=${coordinates.latitude}&longitude=${coordinates.longitude}&u=${phoneNumber}&tipo=${type}`,
       )
       startInterval()
       setIsLocation(true)
-      console.log(data)
     } catch (error) {
       console.error(error)
     }
@@ -84,27 +99,27 @@ function Home() {
     try {
       TaskManager.defineTask('sendLocationTask', async () => {
         try {
-          const coordData = await getCurrentLocationAsync();
-          console.log('Localização atual:', coordData);
-          sendLocation(coordData);
-          return BackgroundFetch.Result.NewData;
+          const coordData = await getCurrentLocationAsync()
+          console.log('Localização atual:', coordData)
+          sendLocation(coordData)
+          return BackgroundFetch.Result.NewData
         } catch (error) {
-          console.error('Erro ao executar tarefa em segundo plano:', error);
-          return BackgroundFetch.Result.Failed;
+          console.error('Erro ao executar tarefa em segundo plano:', error)
+          return BackgroundFetch.Result.Failed
         }
-      });
+      })
 
       await BackgroundFetch.registerTaskAsync('sendLocationTask', {
         minimumInterval: 60, // Intervalo mínimo em segundos
         stopOnTerminate: false, // Continua em segundo plano mesmo quando o aplicativo é fechado
         startOnBoot: true, // Inicia automaticamente após a inicialização do dispositivo
-      });
+      })
 
-      BackgroundFetch.setMinimumIntervalAsync(60); // Garante que a tarefa seja executada a cada 60 segundos
+      BackgroundFetch.setMinimumIntervalAsync(60) // Garante que a tarefa seja executada a cada 60 segundos
     } catch (error) {
-      console.error('Erro ao registrar tarefa em segundo plano:', error);
+      console.error('Erro ao registrar tarefa em segundo plano:', error)
     }
-  };
+  }
 
   return (
     <Container>
